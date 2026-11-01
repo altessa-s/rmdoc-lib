@@ -34,7 +34,7 @@ int main(void) {
     uint8_t *payload = malloc(n);
     CHECK(payload);
     memset(payload, 'a', n);
-    f = fopen(source, "wb");
+    f = rmd_fopen(source, true);
     CHECK(f);
     CHECK(fwrite(payload, 1, n, f) == n);
     CHECK(!fclose(f));

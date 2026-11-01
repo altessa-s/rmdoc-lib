@@ -8,6 +8,7 @@
 #include "rmd_internal.h"
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#include <share.h>
 #include <wchar.h>
 #include <windows.h>
 static wchar_t *wide_path(const char *path) {
@@ -27,7 +28,7 @@ FILE *rmd_fopen(const char *path, bool write) {
     wchar_t *p = wide_path(path);
     if (!p)
         return nullptr;
-    FILE *f = _wfopen(p, write ? L"wb" : L"rb");
+    FILE *f = _wfsopen(p, write ? L"wb" : L"rb", _SH_DENYNO);
     free(p);
     return f;
 }
