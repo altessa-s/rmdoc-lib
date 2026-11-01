@@ -1,0 +1,3 @@
+name: rmdoc CodeQL
+queries:
+  - uses: security-extended

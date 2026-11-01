@@ -1,0 +1,26 @@
+# CMake
+build/
+build-*/
+cmake-build-*/
+
+# Compiler and analyser output
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dSYM/
+compile_commands.json
+.cache/
+
+.DS_Store
+
+__pycache__/
+*.pyc
+stage/
+consumer-build/
+corpus/
+crash-*
+leak-*
+timeout-*
+*.plist
