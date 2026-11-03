@@ -1,6 +1,7 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
 #define _FILE_OFFSET_BITS 64
@@ -11,6 +12,7 @@
 #include <share.h>
 #include <wchar.h>
 #include <windows.h>
+
 /* Converts a UTF-8 path to a newly allocated wide string for the Win32
  * wide-char APIs; NULL on conversion failure. */
 static wchar_t* wide_path(const char* path) {
@@ -25,6 +27,7 @@ static wchar_t* wide_path(const char* path) {
   }
   return p;
 }
+
 FILE* rmd_fopen(const char* path, bool write) {
   wchar_t* p = wide_path(path);
   if (!p) return nullptr;
@@ -32,12 +35,15 @@ FILE* rmd_fopen(const char* path, bool write) {
   free(p);
   return f;
 }
+
 int rmd_seek(FILE* f, uint64_t position) {
   return _fseeki64(f, (int64_t)position, SEEK_SET);
 }
+
 void rmd_unmap(rmd_bytes data) {
   if (data.size) UnmapViewOfFile(data.bytes);
 }
+
 /* Memory-maps path read-only into *out (empty if the file is zero bytes);
  * fails for anything that is not a regular, readable file. */
 static rmd_status map_file(const char* path, rmd_bytes* out) {
@@ -73,15 +79,19 @@ static rmd_status map_file(const char* path, rmd_bytes* out) {
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
 FILE* rmd_fopen(const char* path, bool write) {
   return fopen(path, write ? "wb" : "rb");
 }
+
 int rmd_seek(FILE* f, uint64_t position) {
   return fseeko(f, (off_t)position, SEEK_SET);
 }
+
 void rmd_unmap(rmd_bytes data) {
   if (data.size) munmap((void*)(uintptr_t)data.bytes, data.size);
 }
+
 /* Memory-maps path read-only into *out (empty if the file is zero bytes);
  * fails for anything that is not a regular, readable file. */
 static rmd_status map_file(const char* path, rmd_bytes* out) {
@@ -106,6 +116,7 @@ static rmd_status map_file(const char* path, rmd_bytes* out) {
   return RMD_OK;
 }
 #endif
+
 rmd_status rmd_reader_open_file(const char* path, const rmd_limits* limits,
                                 rmd_reader** out, rmd_error* e) {
   if (!path || !out) return RMD_FAIL(e, RMD_ERR_INVALID_ARGUMENT, nullptr);

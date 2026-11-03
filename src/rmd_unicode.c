@@ -1,6 +1,7 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "rmd_internal.h"
 #include "rmd_unicode_data.h"
 
@@ -38,6 +39,7 @@ size_t rmd_utf8_next(rmd_str s, size_t at, uint32_t* cp) {
   *cp = value;
   return at + n;
 }
+
 bool rmd_utf8_valid(rmd_str s) {
   if (s.length && !s.bytes) return false;
   for (size_t at = 0; at < s.length;) {
@@ -47,6 +49,7 @@ bool rmd_utf8_valid(rmd_str s) {
   }
   return true;
 }
+
 /* Binary-searches the sorted range table for cp; returns the matching
  * value, or 0 if cp is in no range. */
 static uint8_t property(uint32_t cp, const rmd_unicode_range* table, size_t n) {
@@ -62,11 +65,13 @@ static uint8_t property(uint32_t cp, const rmd_unicode_range* table, size_t n) {
   }
   return 0;
 }
+
 typedef struct {
   uint32_t cp;
   uint8_t ccc;
   size_t order;
 } scalar;
+
 /* qsort comparator for canonical ordering: by combining class, ties
  * broken by original position for stability. */
 static int by_combining(const void* a, const void* b) {
@@ -74,6 +79,7 @@ static int by_combining(const void* a, const void* b) {
   if (x->ccc != y->ccc) return (x->ccc > y->ccc) - (x->ccc < y->ccc);
   return (x->order > y->order) - (x->order < y->order);
 }
+
 /* Binary-searches the sorted decomposition table for cp; NULL if cp has
  * no canonical decomposition. */
 static const rmd_decomposition* decomposition(uint32_t cp) {
@@ -89,6 +95,7 @@ static const rmd_decomposition* decomposition(uint32_t cp) {
   }
   return nullptr;
 }
+
 /* Canonically decomposes s (Hangul algorithmically, others via the
  * decomposition table) into out and count, then canonically reorders runs
  * of combining marks. */
@@ -175,6 +182,7 @@ rmd_status rmd_validate_name(rmd_str s, rmd_layout layout, rmd_error* e) {
                     "unsafe or invalid UTF-8 name");
   return RMD_OK;
 }
+
 rmd_str rmd_document_id(rmd_str s) {
   if (!s.bytes) return (rmd_str){0};
   size_t dot = s.length;
@@ -184,13 +192,16 @@ rmd_str rmd_document_id(rmd_str s) {
   }
   return (rmd_str){s.bytes, dot};
 }
+
 /* Node height, treating NULL as height 0. */
 static int height(const rmd_name_node* p) { return p ? p->height : 0; }
+
 /* Recomputes p's height from its children's heights. */
 static void update(rmd_name_node* p) {
   int a = height(p->left), b = height(p->right);
   p->height = 1 + (a > b ? a : b);
 }
+
 /* AVL left rotation around p. */
 static rmd_name_node* rotate_left(rmd_name_node* p) {
   rmd_name_node* q = p->right;
@@ -200,6 +211,7 @@ static rmd_name_node* rotate_left(rmd_name_node* p) {
   update(q);
   return q;
 }
+
 /* AVL right rotation around p. */
 static rmd_name_node* rotate_right(rmd_name_node* p) {
   rmd_name_node* q = p->left;
@@ -209,6 +221,7 @@ static rmd_name_node* rotate_right(rmd_name_node* p) {
   update(q);
   return q;
 }
+
 /* Lexicographically compares a and b's code-point keys, shorter first on
  * a common prefix. */
 static int compare(const rmd_name_node* a, const rmd_name_node* b) {
@@ -217,6 +230,7 @@ static int compare(const rmd_name_node* a, const rmd_name_node* b) {
     if (a->key[i] != b->key[i]) return a->key[i] < b->key[i] ? -1 : 1;
   return (a->length > b->length) - (a->length < b->length);
 }
+
 /* Inserts node into the AVL tree rooted at p, rebalancing as needed;
  * sets *duplicate without modifying the tree if an equal node is already
  * present. */
@@ -245,6 +259,7 @@ static rmd_name_node* insert(rmd_name_node* p, rmd_name_node* node,
   }
   return p;
 }
+
 rmd_status rmd_names_insert(rmd_name_node** tree, rmd_str name) {
   scalar* values = nullptr;
   size_t n = 0;
@@ -270,6 +285,7 @@ rmd_status rmd_names_insert(rmd_name_node** tree, rmd_str name) {
   }
   return RMD_OK;
 }
+
 void rmd_names_free(rmd_name_node* p) {
   if (!p) return;
   rmd_names_free(p->left);

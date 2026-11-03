@@ -1,11 +1,14 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "rmd_internal.h"
+
 /* Whether byte range [at, at+n) fits within end, without overflowing. */
 static bool inside(size_t at, uint64_t n, size_t end) {
   return at <= end && n <= end - at;
 }
+
 /* Walks n bytes of extra-field tag/length records, rejecting a ZIP64
  * record (tag 1); strict also requires the records to exactly fill n. */
 static rmd_status extra(const uint8_t* p, size_t n, bool strict) {
@@ -19,6 +22,7 @@ static rmd_status extra(const uint8_t* p, size_t n, bool strict) {
   }
   return strict && at != n ? RMD_ERR_MALFORMED_ARCHIVE : RMD_OK;
 }
+
 /* Whether the 12 bytes at at are a data descriptor matching entry's
  * crc32 and sizes. */
 static bool descriptor(const uint8_t* p, size_t at, size_t end,
@@ -27,6 +31,7 @@ static bool descriptor(const uint8_t* p, size_t at, size_t end,
          rmd_u32(p + at + 4) == entry->compressed_size &&
          rmd_u32(p + at + 8) == entry->uncompressed_size;
 }
+
 /* Parses and fully validates the central directory record at *cursor
  * (and its matching local header), filling r->entries[index] and
  * r->locations[index], and advances *cursor past it. */
@@ -110,11 +115,13 @@ static rmd_status record(rmd_reader* r, size_t index, size_t* cursor,
   return RMD_OK;
 #undef BAD
 }
+
 /* qsort comparator ordering locations by their starting byte offset. */
 static int by_region(const void* a, const void* b) {
   const rmd_location *x = a, *y = b;
   return (x->start > y->start) - (x->start < y->start);
 }
+
 /* Locates and validates the end-of-central-directory record, then parses
  * every central directory record into r->entries/locations and checks
  * that no two entries' payload regions overlap. */
@@ -182,6 +189,7 @@ static rmd_status directory(rmd_reader* r, rmd_error* e) {
   free(sorted);
   return status == RMD_OK ? RMD_OK : RMD_FAIL(e, status, "entries overlap");
 }
+
 rmd_status rmd_reader_open(rmd_bytes data, const rmd_limits* limits,
                            rmd_reader** out, rmd_error* e) {
   if (!out || (!data.bytes && data.size))
@@ -198,6 +206,7 @@ rmd_status rmd_reader_open(rmd_bytes data, const rmd_limits* limits,
   *out = r;
   return RMD_OK;
 }
+
 void rmd_reader_close(rmd_reader* r) {
   if (!r) return;
   for (size_t i = 0; i < r->count; i++)
@@ -207,10 +216,13 @@ void rmd_reader_close(rmd_reader* r) {
   if (r->mapped) rmd_unmap(r->data);
   free(r);
 }
+
 size_t rmd_reader_count(const rmd_reader* r) { return r ? r->count : 0; }
+
 const rmd_entry* rmd_reader_entry(const rmd_reader* r, size_t index) {
   return r && index < r->count ? &r->entries[index] : nullptr;
 }
+
 /* Builds, in *out, which entries are selected (via select, or all if
  * NULL), then checks the selected set against the reader's resource
  * budgets before returning it. */
@@ -263,6 +275,7 @@ done:
   free(chosen);
   return status;
 }
+
 rmd_status rmd_contents(const rmd_reader* r, size_t i, rmd_buffer* out,
                         rmd_error* e) {
   const rmd_entry* entry = &r->entries[i];
@@ -289,6 +302,7 @@ rmd_status rmd_contents(const rmd_reader* r, size_t i, rmd_buffer* out,
   *out = b;
   return RMD_OK;
 }
+
 rmd_status rmd_reader_foreach(const rmd_reader* r, rmd_select_fn select,
                               void* select_context, rmd_file_fn body,
                               void* body_context, rmd_error* e) {
@@ -314,6 +328,7 @@ rmd_status rmd_reader_foreach(const rmd_reader* r, rmd_select_fn select,
   free(chosen);
   return status;
 }
+
 rmd_status rmd_reader_unpack(const rmd_reader* r, rmd_select_fn select,
                              void* context, rmd_archive* out, rmd_error* e) {
   if (!r || !out) return RMD_FAIL(e, RMD_ERR_INVALID_ARGUMENT, nullptr);

@@ -1,6 +1,7 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 /* Private namespace for the unmodified vendored miniz 3.1.2. */
 #ifndef RMD_MINIZ_H
 #define RMD_MINIZ_H

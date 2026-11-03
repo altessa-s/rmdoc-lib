@@ -1,7 +1,9 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "test.h"
+
 int main(void) {
   CHECK(strcmp(rmd_version(), "1.0.0") == 0);
   rmd_buffer b = sample();

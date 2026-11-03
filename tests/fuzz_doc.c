@@ -1,14 +1,18 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include <rmdoc/rmdoc.h>
+
 int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size);
+
 static rmd_status consume(void* ctx, const rmd_entry* e, rmd_bytes b) {
   (void)ctx;
   (void)e;
   (void)b;
   return RMD_OK;
 }
+
 int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   rmd_limits limits = rmd_limits_default();
   limits.maximum_entry_count = 128;

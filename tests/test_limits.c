@@ -1,10 +1,13 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "test.h"
+
 typedef struct {
   size_t selected, delivered;
 } counts;
+
 static rmd_status selection(void* context, const rmd_entry* entry,
                             bool* include) {
   (void)entry;
@@ -14,6 +17,7 @@ static rmd_status selection(void* context, const rmd_entry* entry,
   *include = true;
   return RMD_OK;
 }
+
 static rmd_status body(void* context, const rmd_entry* entry, rmd_bytes data) {
   (void)entry;
   (void)data;
@@ -22,12 +26,14 @@ static rmd_status body(void* context, const rmd_entry* entry, rmd_bytes data) {
   c->delivered++;
   return RMD_OK;
 }
+
 static rmd_status refuse(void* context, const rmd_entry* entry, bool* include) {
   (void)context;
   (void)entry;
   (void)include;
   return RMD_ERR_IO;
 }
+
 int main(void) {
   rmd_buffer b = sample();
   rmd_limits d = rmd_limits_default();

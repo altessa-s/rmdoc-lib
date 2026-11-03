@@ -1,8 +1,10 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "fixtures.h"
 #include "test.h"
+
 int main(void) {
   for (size_t i = 0; i < sizeof fixtures / sizeof *fixtures; i++) {
     rmd_buffer b = {(uint8_t*)(uintptr_t)fixtures[i].data, fixtures[i].size};

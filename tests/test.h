@@ -1,6 +1,7 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #ifndef RMD_TEST_H
 #define RMD_TEST_H
 #include "rmd_internal.h"
@@ -22,11 +23,13 @@ static inline rmd_buffer sample(void) {
   OK(rmd_pack(files, 3, &b, nullptr));
   return b;
 }
+
 static inline rmd_reader* open_buffer(rmd_buffer b, const rmd_limits* limits) {
   rmd_reader* r = nullptr;
   OK(rmd_reader_open((rmd_bytes){b.bytes, b.size}, limits, &r, nullptr));
   return r;
 }
+
 static inline rmd_status discard(void* context, const rmd_entry* entry,
                                  rmd_bytes b) {
   (void)entry;
@@ -34,6 +37,7 @@ static inline rmd_status discard(void* context, const rmd_entry* entry,
   if (context) (*(size_t*)context)++;
   return RMD_OK;
 }
+
 static inline rmd_status skip(void* ctx, const rmd_entry* entry,
                               bool* include) {
   (void)entry;
@@ -41,6 +45,7 @@ static inline rmd_status skip(void* ctx, const rmd_entry* entry,
   *include = false;
   return RMD_OK;
 }
+
 static inline rmd_status inspect(rmd_buffer b, bool unpack) {
   rmd_reader* r = nullptr;
   rmd_status s =

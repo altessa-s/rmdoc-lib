@@ -1,11 +1,14 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "rmd_internal.h"
+
 typedef struct {
   rmd_entry entry;
   uint32_t offset;
 } write_record;
+
 struct rmd_writer {
   FILE* file;
   rmd_compression compression;
@@ -16,6 +19,7 @@ struct rmd_writer {
   rmd_name_node* names;
   bool finished;
 };
+
 /* Encodes a 30-byte ZIP local file header for r into p. */
 static void local_header(uint8_t p[30], const write_record* r) {
   memset(p, 0, 30);
@@ -28,6 +32,7 @@ static void local_header(uint8_t p[30], const write_record* r) {
   rmd_put32(p + 22, r->entry.uncompressed_size);
   rmd_put16(p + 26, (uint16_t)r->entry.name.length);
 }
+
 /* Encodes a 46-byte ZIP central directory header for r into p. */
 static void central_header(uint8_t p[46], const write_record* r) {
   memset(p, 0, 46);
@@ -42,6 +47,7 @@ static void central_header(uint8_t p[46], const write_record* r) {
   rmd_put16(p + 28, (uint16_t)r->entry.name.length);
   rmd_put32(p + 42, r->offset);
 }
+
 /* Encodes the 22-byte end-of-central-directory record into p. */
 static void end_header(uint8_t p[22], size_t count, uint32_t size,
                        uint32_t offset) {
@@ -52,6 +58,7 @@ static void end_header(uint8_t p[22], size_t count, uint32_t size,
   rmd_put32(p + 12, size);
   rmd_put32(p + 16, offset);
 }
+
 rmd_status rmd_pack(const rmd_file* files, size_t count, rmd_buffer* out,
                     rmd_error* e) {
   if (!out || (!files && count))
@@ -114,6 +121,7 @@ rmd_status rmd_pack(const rmd_file* files, size_t count, rmd_buffer* out,
   *out = result;
   return RMD_OK;
 }
+
 rmd_status rmd_writer_open(const char* path, rmd_compression compression,
                            rmd_layout layout, rmd_writer** out, rmd_error* e) {
   if (!path || !out ||
@@ -132,6 +140,7 @@ rmd_status rmd_writer_open(const char* path, rmd_compression compression,
   *out = w;
   return RMD_OK;
 }
+
 /* Validates name, grows the record array if needed, and fills *out with
  * a new record positioned at the writer's current offset; does not write
  * anything yet. */
@@ -164,6 +173,7 @@ static rmd_status prepare(rmd_writer* w, rmd_str name, write_record* out,
                         .offset = (uint32_t)w->offset};
   return RMD_OK;
 }
+
 /* Writes n bytes to the output file and advances w->offset; marks the
  * writer finished on overflow or I/O failure. */
 static rmd_status append(rmd_writer* w, const void* p, size_t n, rmd_error* e) {
@@ -178,6 +188,7 @@ static rmd_status append(rmd_writer* w, const void* p, size_t n, rmd_error* e) {
   w->offset += n;
   return RMD_OK;
 }
+
 /* Writes r's local header followed by its name. */
 static rmd_status start(rmd_writer* w, const write_record* r, rmd_error* e) {
   uint8_t header[30];
@@ -186,11 +197,13 @@ static rmd_status start(rmd_writer* w, const write_record* r, rmd_error* e) {
   if (s == RMD_OK) s = append(w, r->entry.name.bytes, r->entry.name.length, e);
   return s;
 }
+
 /* Appends r to the writer's records and the pending directory size. */
 static void remember(rmd_writer* w, write_record r) {
   w->records[w->count++] = r;
   w->directory_size += 46 + r.entry.name.length;
 }
+
 rmd_status rmd_writer_add(rmd_writer* w, rmd_file file,
                           rmd_compression compression, rmd_error* e) {
   if (!w || (!file.data.bytes && file.data.size) ||
@@ -235,6 +248,7 @@ rmd_status rmd_writer_add(rmd_writer* w, rmd_file file,
   remember(w, r);
   return RMD_OK;
 }
+
 rmd_status rmd_writer_add_file(rmd_writer* w, rmd_str name, const char* path,
                                rmd_error* e) {
   if (!w || !path) return RMD_FAIL(e, RMD_ERR_INVALID_ARGUMENT, nullptr);
@@ -301,6 +315,7 @@ rmd_status rmd_writer_add_file(rmd_writer* w, rmd_str name, const char* path,
   remember(w, r);
   return RMD_OK;
 }
+
 rmd_status rmd_writer_finish(rmd_writer* w, rmd_error* e) {
   if (!w) return RMD_FAIL(e, RMD_ERR_INVALID_ARGUMENT, nullptr);
   if (w->finished) return RMD_FAIL(e, RMD_ERR_ARCHIVE_FINISHED, nullptr);
@@ -329,6 +344,7 @@ rmd_status rmd_writer_finish(rmd_writer* w, rmd_error* e) {
   w->file = nullptr;
   return status;
 }
+
 void rmd_writer_close(rmd_writer* w) {
   if (!w) return;
   if (w->file) fclose(w->file);

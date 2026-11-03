@@ -1,8 +1,10 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "fixtures.h"
 #include "test.h"
+
 int main(void) {
   rmd_error e = {0};
   rmd_reader* sentinel = (rmd_reader*)(uintptr_t)1;

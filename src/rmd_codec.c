@@ -1,21 +1,26 @@
 /* Copyright 2026 ALTESSA SOLUTIONS INC.
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
+
 #include "rmd_internal.h"
 #include "rmd_miniz.h"
+
 /* miniz zalloc callback: forwards to rmd_calloc, ignoring context. */
 static void* codec_alloc(void* context, size_t n, size_t size) {
   (void)context;
   return rmd_calloc(n, size);
 }
+
 /* miniz zfree callback: forwards to free, ignoring context. */
 static void codec_free(void* context, void* p) {
   (void)context;
   free(p);
 }
+
 uint32_t rmd_crc32(uint32_t crc, rmd_bytes data) {
   return (uint32_t)mz_crc32(crc, data.bytes, data.size);
 }
+
 rmd_status rmd_inflate(rmd_bytes input, uint32_t expected, rmd_buffer* out) {
   if (!input.size) return RMD_ERR_MALFORMED_ARCHIVE;
   mz_stream s = {.zalloc = codec_alloc, .zfree = codec_free};
@@ -62,6 +67,7 @@ rmd_status rmd_inflate(rmd_bytes input, uint32_t expected, rmd_buffer* out) {
     *out = result;
   return status;
 }
+
 rmd_status rmd_deflate(rmd_bytes input, rmd_buffer* out) {
   /* Only a result smaller than the input is useful. A full buffer is a
    * valid reason to store the original; allocation failure remains explicit. */
