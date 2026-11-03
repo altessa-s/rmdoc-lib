@@ -50,18 +50,8 @@ rmd_status rmd_contents(const rmd_reader* r, size_t index, rmd_buffer* out,
 FILE* rmd_fopen(const char* path, bool write);
 int rmd_seek(FILE* file, uint64_t position);
 void rmd_unmap(rmd_bytes data);
-static inline uint16_t rmd_u16(const uint8_t* p) {
-  return (uint16_t)((uint16_t)p[0] | (uint16_t)p[1] << 8);
-}
-static inline uint32_t rmd_u32(const uint8_t* p) {
-  return (uint32_t)rmd_u16(p) | (uint32_t)rmd_u16(p + 2) << 16;
-}
-static inline void rmd_put16(uint8_t* p, uint16_t x) {
-  p[0] = (uint8_t)x;
-  p[1] = (uint8_t)(x >> 8);
-}
-static inline void rmd_put32(uint8_t* p, uint32_t x) {
-  rmd_put16(p, (uint16_t)x);
-  rmd_put16(p + 2, (uint16_t)(x >> 16));
-}
+uint16_t rmd_u16(const uint8_t* p);
+uint32_t rmd_u32(const uint8_t* p);
+void rmd_put16(uint8_t* p, uint16_t x);
+void rmd_put32(uint8_t* p, uint32_t x);
 #endif

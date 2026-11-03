@@ -42,7 +42,7 @@ endif()
 # The library
 # ---------------------------------------------------------------------------
 
-set(RMDOC_SOURCES src/rmd_support.c src/rmd_unicode.c src/rmd_reader.c
+set(RMDOC_SOURCES src/rmd_support.c src/rmd_unicode.c src/rmd_unicode_data.c src/rmd_reader.c
     src/rmd_writer.c src/rmd_codec.c src/rmd_io.c src/rmd_miniz.c)
 set(RMDOC_PUBLIC_HEADERS include/rmdoc/rmdoc.h include/rmdoc/export.h)
 # Keep upstream miniz unmodified; strict warnings cover our code.

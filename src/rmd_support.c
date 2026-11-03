@@ -141,3 +141,21 @@ rmd_status rmd_reader_document_ids(const rmd_reader* r, rmd_strings* out,
   *out = result;
   return RMD_OK;
 }
+
+uint16_t rmd_u16(const uint8_t* p) {
+  return (uint16_t)((uint16_t)p[0] | (uint16_t)p[1] << 8);
+}
+
+uint32_t rmd_u32(const uint8_t* p) {
+  return (uint32_t)rmd_u16(p) | (uint32_t)rmd_u16(p + 2) << 16;
+}
+
+void rmd_put16(uint8_t* p, uint16_t x) {
+  p[0] = (uint8_t)x;
+  p[1] = (uint8_t)(x >> 8);
+}
+
+void rmd_put32(uint8_t* p, uint32_t x) {
+  rmd_put16(p, (uint16_t)x);
+  rmd_put16(p + 2, (uint16_t)(x >> 16));
+}

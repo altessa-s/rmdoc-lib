@@ -71,7 +71,7 @@ static int by_combining(const void* a, const void* b) {
   return (x->order > y->order) - (x->order < y->order);
 }
 static const rmd_decomposition* decomposition(uint32_t cp) {
-  size_t lo = 0, hi = sizeof rmd_decompositions / sizeof *rmd_decompositions;
+  size_t lo = 0, hi = rmd_decompositions_count;
   while (lo < hi) {
     size_t mid = lo + (hi - lo) / 2;
     if (rmd_decompositions[mid].scalar < cp)
@@ -111,11 +111,9 @@ static rmd_status nfd(rmd_str s, scalar** out, size_t* count) {
       }
     }
     for (size_t i = 0; i < n; i += 1) {
-      values[used] =
-          (scalar){parts[i],
-                   property(parts[i], rmd_combining,
-                            sizeof rmd_combining / sizeof *rmd_combining),
-                   used};
+      values[used] = (scalar){
+          parts[i], property(parts[i], rmd_combining, rmd_combining_count),
+          used};
       used += 1;
     }
   }
@@ -158,7 +156,7 @@ rmd_status rmd_validate_name(rmd_str s, rmd_layout layout, rmd_error* e) {
       uint32_t cp;
       at = rmd_utf8_next(s, at, &cp);
       if (!at || cp < 0x20 || (cp >= 0x7f && cp <= 0x9f) || cp == '\\' ||
-          property(cp, rmd_format, sizeof rmd_format / sizeof *rmd_format)) {
+          property(cp, rmd_format, rmd_format_count)) {
         valid = false;
         break;
       }
