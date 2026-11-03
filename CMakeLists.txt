@@ -33,6 +33,7 @@ endif()
 
 option(RMDOC_BUILD_TESTS "Build the test suite" ${RMDOC_TOP_LEVEL})
 option(RMDOC_WERROR "Turn compiler warnings into errors" OFF)
+option(RMDOC_LTO "Link-time optimization for optimized shared builds" ON)
 option(RMDOC_BUILD_FUZZERS "Build the libFuzzer targets (clang only)" OFF)
 if(RMDOC_BUILD_FUZZERS AND NOT RMDOC_BUILD_TESTS)
     message(FATAL_ERROR "RMDOC_BUILD_FUZZERS requires RMDOC_BUILD_TESTS")
@@ -78,6 +79,21 @@ target_compile_features(rmdoc PUBLIC c_std_23)
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(rmdoc PRIVATE RMDOC_BUILDING_SHARED
                                       INTERFACE RMDOC_USING_SHARED)
+endif()
+
+# Link-time optimization for the shared library only: a static archive built
+# with it holds compiler bitcode that another compiler cannot link.
+if(BUILD_SHARED_LIBS AND RMDOC_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT RMDOC_IPO OUTPUT RMDOC_IPO_ERROR LANGUAGES C)
+    if(RMDOC_IPO)
+        set_target_properties(rmdoc PROPERTIES
+            INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
+            INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON
+            INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
+    else()
+        message(STATUS "rmdoc: link-time optimization unavailable: ${RMDOC_IPO_ERROR}")
+    endif()
 endif()
 
 # The warning set, and it is one set: the library is built with clang or

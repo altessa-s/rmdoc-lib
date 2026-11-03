@@ -30,7 +30,8 @@ cmake --build build --target check
 cmake --install build --prefix "$PWD/stage"
 ```
 
-Use `-DBUILD_SHARED_LIBS=ON` for a shared library. Tests default to ON only when
+Use `-DBUILD_SHARED_LIBS=ON` for a shared library; optimized shared builds use
+link-time optimization unless `RMDOC_LTO=OFF`. Tests default to ON only when
 this is the top-level project. `RMDOC_BUILD_TESTS=OFF` builds just the library.
 `RMDOC_BUILD_FUZZERS=ON` requires Clang and its libFuzzer runtime, plus tests.
 
