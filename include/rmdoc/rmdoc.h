@@ -96,17 +96,31 @@ typedef struct {
 typedef struct rmd_reader rmd_reader;
 typedef struct rmd_writer rmd_writer;
 
+/* Library version as "major.minor.patch"; the returned pointer is static. */
 RMD_API const char* rmd_version(void);
+/* Human-readable name for status; an out-of-range value gives "unknown
+ * status". */
 RMD_API const char* rmd_status_string(rmd_status status);
+/* Generous default resource limits for rmd_reader_open. */
 RMD_API rmd_limits rmd_limits_default(void);
+/* Default limits with the compression ratio tightened to 1032:1, the
+ * maximum deflate can produce; use to reject implausible archives. */
 RMD_API rmd_limits rmd_limits_format(void);
+/* Checks that name is valid UTF-8 and safe for layout: no control
+ * characters, backslashes or Unicode format characters, and a path shape
+ * (component count, no leading dot) that the layout permits. */
 [[nodiscard]] RMD_API rmd_status rmd_validate_name(rmd_str name,
                                                    rmd_layout layout,
                                                    rmd_error* error);
 /* Borrowed substring. No validation or allocation. */
 RMD_API rmd_str rmd_document_id(rmd_str name);
+/* Frees buffer's bytes and resets it to the empty state. No-op on NULL. */
 RMD_API void rmd_buffer_free(rmd_buffer* buffer);
+/* Frees every name and payload archive owns, then resets it to the empty
+ * state. No-op on NULL. */
 RMD_API void rmd_archive_free(rmd_archive* archive);
+/* Frees every string strings owns, then resets it to the empty state.
+ * No-op on NULL. */
 RMD_API void rmd_strings_free(rmd_strings* strings);
 
 /* Parses and validates the ENTIRE directory and local headers; no inflation.
@@ -121,11 +135,17 @@ RMD_API void rmd_strings_free(rmd_strings* strings);
                                                       const rmd_limits* limits,
                                                       rmd_reader** out,
                                                       rmd_error* error);
+/* Closes reader, releasing its entries and, if it owns a mapped file,
+ * unmapping it. No-op on NULL. */
 RMD_API void rmd_reader_close(rmd_reader* reader);
+/* Number of entries in the archive; zero if reader is NULL. */
 RMD_API size_t rmd_reader_count(const rmd_reader* reader);
 /* Entries/names are borrowed until close; out-of-range returns NULL. */
 RMD_API const rmd_entry* rmd_reader_entry(const rmd_reader* reader,
                                           size_t index);
+/* Collects the distinct document IDs (see rmd_document_id) across all
+ * entries, in first-seen order. The result is owned; free with
+ * rmd_strings_free. */
 [[nodiscard]] RMD_API rmd_status rmd_reader_document_ids(
     const rmd_reader* reader, rmd_strings* out, rmd_error* error);
 /* Callbacks return RMD_OK to continue; any other value becomes CALLBACK.
@@ -137,9 +157,15 @@ typedef rmd_status (*rmd_select_fn)(void* context, const rmd_entry* entry,
                                     bool* include);
 typedef rmd_status (*rmd_file_fn)(void* context, const rmd_entry* entry,
                                   rmd_bytes payload);
+/* Invokes select then body for each entry that passes the budgets (see
+ * rmd_select_fn and rmd_file_fn above); payload is decompressed and
+ * checksum-verified before body sees it. */
 [[nodiscard]] RMD_API rmd_status rmd_reader_foreach(
     const rmd_reader* reader, rmd_select_fn select, void* select_context,
     rmd_file_fn body, void* body_context, rmd_error* error);
+/* Like rmd_reader_foreach, but collects the selected entries'
+ * decompressed, checksum-verified contents into a newly allocated archive
+ * instead of invoking a callback. */
 [[nodiscard]] RMD_API rmd_status rmd_reader_unpack(const rmd_reader* reader,
                                                    rmd_select_fn select,
                                                    void* select_context,
@@ -171,7 +197,13 @@ typedef rmd_status (*rmd_file_fn)(void* context, const rmd_entry* entry,
                                                      rmd_str name,
                                                      const char* source_path,
                                                      rmd_error* error);
+/* Writes the central directory and end record, then closes the output
+ * file; the writer is marked finished either way. Call rmd_writer_close
+ * afterward to release it. */
 [[nodiscard]] RMD_API rmd_status rmd_writer_finish(rmd_writer* writer,
                                                    rmd_error* error);
+/* Releases writer and its buffered records; if finish was never called,
+ * closes the underlying file without completing the archive. No-op on
+ * NULL. */
 RMD_API void rmd_writer_close(rmd_writer* writer);
 #endif

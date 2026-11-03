@@ -3,10 +3,12 @@
  * found in the LICENSE file. */
 #include "rmd_internal.h"
 #include "rmd_miniz.h"
+/* miniz zalloc callback: forwards to rmd_calloc, ignoring context. */
 static void* codec_alloc(void* context, size_t n, size_t size) {
   (void)context;
   return rmd_calloc(n, size);
 }
+/* miniz zfree callback: forwards to free, ignoring context. */
 static void codec_free(void* context, void* p) {
   (void)context;
   free(p);

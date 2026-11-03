@@ -5,6 +5,8 @@
 #ifdef RMDOC_TESTING
 static thread_local size_t remaining = SIZE_MAX;
 void rmd_test_fail_after(size_t n) { remaining = n; }
+/* Whether the next allocation should be forced to fail, consuming one
+ * count set by rmd_test_fail_after. */
 static bool fail(void) {
   if (remaining == SIZE_MAX) return false;
   if (!remaining) return true;
@@ -12,6 +14,7 @@ static bool fail(void) {
   return false;
 }
 #else
+/* Always false: failure injection is compiled out of non-test builds. */
 static bool fail(void) { return false; }
 #endif
 void* rmd_alloc(size_t n) { return fail() ? nullptr : malloc(n ? n : 1); }
@@ -23,6 +26,8 @@ void* rmd_calloc(size_t n, size_t size) {
 void* rmd_realloc(void* p, size_t n) {
   return fail() ? nullptr : realloc(p, n ? n : 1);
 }
+/* Stringizes a macro's expansion (two-step to force expansion before
+ * stringizing). */
 #define RMD_STRINGIFY_(x) #x
 #define RMD_STRINGIFY(x) RMD_STRINGIFY_(x)
 const char* rmd_version(void) {

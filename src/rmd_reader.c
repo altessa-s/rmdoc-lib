@@ -2,9 +2,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file. */
 #include "rmd_internal.h"
+/* Whether byte range [at, at+n) fits within end, without overflowing. */
 static bool inside(size_t at, uint64_t n, size_t end) {
   return at <= end && n <= end - at;
 }
+/* Walks n bytes of extra-field tag/length records, rejecting a ZIP64
+ * record (tag 1); strict also requires the records to exactly fill n. */
 static rmd_status extra(const uint8_t* p, size_t n, bool strict) {
   size_t at = 0;
   while (n - at >= 4) {
@@ -16,12 +19,17 @@ static rmd_status extra(const uint8_t* p, size_t n, bool strict) {
   }
   return strict && at != n ? RMD_ERR_MALFORMED_ARCHIVE : RMD_OK;
 }
+/* Whether the 12 bytes at at are a data descriptor matching entry's
+ * crc32 and sizes. */
 static bool descriptor(const uint8_t* p, size_t at, size_t end,
                        const rmd_entry* entry) {
   return inside(at, 12, end) && rmd_u32(p + at) == entry->crc32 &&
          rmd_u32(p + at + 4) == entry->compressed_size &&
          rmd_u32(p + at + 8) == entry->uncompressed_size;
 }
+/* Parses and fully validates the central directory record at *cursor
+ * (and its matching local header), filling r->entries[index] and
+ * r->locations[index], and advances *cursor past it. */
 static rmd_status record(rmd_reader* r, size_t index, size_t* cursor,
                          size_t directory, size_t directory_end, rmd_error* e) {
   const uint8_t* p = r->data.bytes;
@@ -102,10 +110,14 @@ static rmd_status record(rmd_reader* r, size_t index, size_t* cursor,
   return RMD_OK;
 #undef BAD
 }
+/* qsort comparator ordering locations by their starting byte offset. */
 static int by_region(const void* a, const void* b) {
   const rmd_location *x = a, *y = b;
   return (x->start > y->start) - (x->start < y->start);
 }
+/* Locates and validates the end-of-central-directory record, then parses
+ * every central directory record into r->entries/locations and checks
+ * that no two entries' payload regions overlap. */
 static rmd_status directory(rmd_reader* r, rmd_error* e) {
   const uint8_t* p = r->data.bytes;
   size_t n = r->data.size;
@@ -199,6 +211,9 @@ size_t rmd_reader_count(const rmd_reader* r) { return r ? r->count : 0; }
 const rmd_entry* rmd_reader_entry(const rmd_reader* r, size_t index) {
   return r && index < r->count ? &r->entries[index] : nullptr;
 }
+/* Builds, in *out, which entries are selected (via select, or all if
+ * NULL), then checks the selected set against the reader's resource
+ * budgets before returning it. */
 static rmd_status choose(const rmd_reader* r, rmd_select_fn select,
                          void* context, bool** out, rmd_error* e) {
   bool* chosen = rmd_calloc(r->count, sizeof *chosen);

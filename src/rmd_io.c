@@ -11,6 +11,8 @@
 #include <share.h>
 #include <wchar.h>
 #include <windows.h>
+/* Converts a UTF-8 path to a newly allocated wide string for the Win32
+ * wide-char APIs; NULL on conversion failure. */
 static wchar_t* wide_path(const char* path) {
   int n =
       MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, nullptr, 0);
@@ -36,6 +38,8 @@ int rmd_seek(FILE* f, uint64_t position) {
 void rmd_unmap(rmd_bytes data) {
   if (data.size) UnmapViewOfFile(data.bytes);
 }
+/* Memory-maps path read-only into *out (empty if the file is zero bytes);
+ * fails for anything that is not a regular, readable file. */
 static rmd_status map_file(const char* path, rmd_bytes* out) {
   wchar_t* p = wide_path(path);
   if (!p) return RMD_ERR_IO;
@@ -78,6 +82,8 @@ int rmd_seek(FILE* f, uint64_t position) {
 void rmd_unmap(rmd_bytes data) {
   if (data.size) munmap((void*)(uintptr_t)data.bytes, data.size);
 }
+/* Memory-maps path read-only into *out (empty if the file is zero bytes);
+ * fails for anything that is not a regular, readable file. */
 static rmd_status map_file(const char* path, rmd_bytes* out) {
   int fd = open(path, O_RDONLY);
   if (fd < 0) return RMD_ERR_IO;

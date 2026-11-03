@@ -16,6 +16,7 @@ struct rmd_writer {
   rmd_name_node* names;
   bool finished;
 };
+/* Encodes a 30-byte ZIP local file header for r into p. */
 static void local_header(uint8_t p[30], const write_record* r) {
   memset(p, 0, 30);
   rmd_put32(p, 0x04034b50);
@@ -27,6 +28,7 @@ static void local_header(uint8_t p[30], const write_record* r) {
   rmd_put32(p + 22, r->entry.uncompressed_size);
   rmd_put16(p + 26, (uint16_t)r->entry.name.length);
 }
+/* Encodes a 46-byte ZIP central directory header for r into p. */
 static void central_header(uint8_t p[46], const write_record* r) {
   memset(p, 0, 46);
   rmd_put32(p, 0x02014b50);
@@ -40,6 +42,7 @@ static void central_header(uint8_t p[46], const write_record* r) {
   rmd_put16(p + 28, (uint16_t)r->entry.name.length);
   rmd_put32(p + 42, r->offset);
 }
+/* Encodes the 22-byte end-of-central-directory record into p. */
 static void end_header(uint8_t p[22], size_t count, uint32_t size,
                        uint32_t offset) {
   memset(p, 0, 22);
@@ -129,6 +132,9 @@ rmd_status rmd_writer_open(const char* path, rmd_compression compression,
   *out = w;
   return RMD_OK;
 }
+/* Validates name, grows the record array if needed, and fills *out with
+ * a new record positioned at the writer's current offset; does not write
+ * anything yet. */
 static rmd_status prepare(rmd_writer* w, rmd_str name, write_record* out,
                           rmd_error* e) {
   if (!w) return RMD_FAIL(e, RMD_ERR_INVALID_ARGUMENT, nullptr);
@@ -158,6 +164,8 @@ static rmd_status prepare(rmd_writer* w, rmd_str name, write_record* out,
                         .offset = (uint32_t)w->offset};
   return RMD_OK;
 }
+/* Writes n bytes to the output file and advances w->offset; marks the
+ * writer finished on overflow or I/O failure. */
 static rmd_status append(rmd_writer* w, const void* p, size_t n, rmd_error* e) {
   if ((uint64_t)n > UINT32_MAX - w->offset) {
     w->finished = true;
@@ -170,6 +178,7 @@ static rmd_status append(rmd_writer* w, const void* p, size_t n, rmd_error* e) {
   w->offset += n;
   return RMD_OK;
 }
+/* Writes r's local header followed by its name. */
 static rmd_status start(rmd_writer* w, const write_record* r, rmd_error* e) {
   uint8_t header[30];
   local_header(header, r);
@@ -177,6 +186,7 @@ static rmd_status start(rmd_writer* w, const write_record* r, rmd_error* e) {
   if (s == RMD_OK) s = append(w, r->entry.name.bytes, r->entry.name.length, e);
   return s;
 }
+/* Appends r to the writer's records and the pending directory size. */
 static void remember(rmd_writer* w, write_record r) {
   w->records[w->count++] = r;
   w->directory_size += 46 + r.entry.name.length;
