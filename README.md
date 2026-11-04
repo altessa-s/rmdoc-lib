@@ -30,7 +30,8 @@ cmake --build build --target check
 cmake --install build --prefix "$PWD/stage"
 ```
 
-Use `-DBUILD_SHARED_LIBS=ON` for a shared library. Tests default to ON only when
+Use `-DBUILD_SHARED_LIBS=ON` for a shared library; optimized shared builds use
+link-time optimization unless `RMDOC_LTO=OFF`. Tests default to ON only when
 this is the top-level project. `RMDOC_BUILD_TESTS=OFF` builds just the library.
 `RMDOC_BUILD_FUZZERS=ON` requires Clang and its libFuzzer runtime, plus tests.
 
@@ -178,23 +179,26 @@ python3 tests/compare_swift.py --swift ../rmdoc-swift --library build-shared/lib
 
 This check needs the separate Swift checkout; ordinary builds and tests do not.
 CI defines Linux/macOS/Windows builds, shared/static consumers, sanitizers,
-libFuzzer, CodeQL and tag-based releases. A local Apple toolchain may lack the
-libFuzzer runtime; the deterministic mutation test still runs with sanitizers.
+libFuzzer, CodeQL, a clang-format check and tag-based releases. A local Apple
+toolchain may lack the libFuzzer runtime; the deterministic mutation test still
+runs with sanitizers.
+
+## Bindings
+
+- **[rmdoc-swift](https://github.com/altessa-s/rmdoc-swift)** — the same
+  container as a Swift package for Apple platforms.
+- **[rmdoc-go](https://github.com/altessa-s/rmdoc-go)** — Go bindings over this
+  library.
 
 ## See also
 
-- **[rmdoc-swift](https://github.com/altessa-s/rmdoc-swift)** — the same
-  container as a Swift package.
 - **[rmlines-lib](https://github.com/altessa-s/rmlines-lib)** — the `.rm` v6
-  page format the container's pages are written in, as a C23 library.
-- **[rmlines-swift](https://github.com/altessa-s/rmlines-swift)** and
-  **[rmlines-go](https://github.com/altessa-s/rmlines-go)** — the same page
-  format for Swift and Go.
-- **[rmmarks-lib](https://github.com/altessa-s/rmmarks-lib)** — geometry for
-  highlighted text on those pages.
-- **[Slate Drive](https://slatedrive.app)**
-  ([repository](https://github.com/altessa-s/slatedrive)) — the app these
-  packages are part of.
+  page format: pages, strokes, typed text and highlights, read and written.
+- **[rmmarks-lib](https://github.com/altessa-s/rmmarks-lib)** — which words a
+  highlight covers, and how OCR from cropped strips returns to the page.
+- **[rmrender-lib](https://github.com/altessa-s/rmrender-lib)** — pages and
+  documents drawn to bitmaps and PDF, with pen textures, templates and typed
+  text.
 
 ## Acknowledgements
 
