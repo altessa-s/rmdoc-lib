@@ -179,8 +179,9 @@ python3 tests/compare_swift.py --swift ../rmdoc-swift --library build-shared/lib
 
 This check needs the separate Swift checkout; ordinary builds and tests do not.
 CI defines Linux/macOS/Windows builds, shared/static consumers, sanitizers,
-libFuzzer, CodeQL and tag-based releases. A local Apple toolchain may lack the
-libFuzzer runtime; the deterministic mutation test still runs with sanitizers.
+libFuzzer, CodeQL, a clang-format check and tag-based releases. A local Apple
+toolchain may lack the libFuzzer runtime; the deterministic mutation test still
+runs with sanitizers.
 
 ## See also
 

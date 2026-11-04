@@ -5,7 +5,7 @@
 #include "test.h"
 
 int main(void) {
-  CHECK(strcmp(rmd_version(), "1.0.0") == 0);
+  CHECK(strcmp(rmd_version(), "1.1.0") == 0);
   rmd_buffer b = sample();
   rmd_reader* r = open_buffer(b, nullptr);
   CHECK(rmd_reader_count(r) == 3);
