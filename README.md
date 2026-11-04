@@ -183,20 +183,22 @@ libFuzzer, CodeQL, a clang-format check and tag-based releases. A local Apple
 toolchain may lack the libFuzzer runtime; the deterministic mutation test still
 runs with sanitizers.
 
-## See also
+## Bindings
 
 - **[rmdoc-swift](https://github.com/altessa-s/rmdoc-swift)** — the same
-  container as a Swift package.
+  container as a Swift package for Apple platforms.
+- **[rmdoc-go](https://github.com/altessa-s/rmdoc-go)** — Go bindings over this
+  library.
+
+## See also
+
 - **[rmlines-lib](https://github.com/altessa-s/rmlines-lib)** — the `.rm` v6
-  page format the container's pages are written in, as a C23 library.
-- **[rmlines-swift](https://github.com/altessa-s/rmlines-swift)** and
-  **[rmlines-go](https://github.com/altessa-s/rmlines-go)** — the same page
-  format for Swift and Go.
-- **[rmmarks-lib](https://github.com/altessa-s/rmmarks-lib)** — geometry for
-  highlighted text on those pages.
-- **[Slate Drive](https://slatedrive.app)**
-  ([repository](https://github.com/altessa-s/slatedrive)) — the app these
-  packages are part of.
+  page format: pages, strokes, typed text and highlights, read and written.
+- **[rmmarks-lib](https://github.com/altessa-s/rmmarks-lib)** — which words a
+  highlight covers, and how OCR from cropped strips returns to the page.
+- **[rmrender-lib](https://github.com/altessa-s/rmrender-lib)** — pages and
+  documents drawn to bitmaps and PDF, with pen textures, templates and typed
+  text.
 
 ## Acknowledgements
 
